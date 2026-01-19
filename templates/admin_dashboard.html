@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            Decision Intelligence
+            <span class="role-badge admin">ADMIN</span>
+        </div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('admin_users') }}" class="nav-link">Users</a>
+            <a href="{{ url_for('admin_create_user') }}" class="nav-link">Create User</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome back, {{ current_user.username }}!</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card admin">
+            <div class="icon">👥</div>
+            <div class="number">{{ total_users }}</div>
+            <div class="label">Total Users</div>
+        </div>
+        <div class="stat-card admin">
+            <div class="icon">🔧</div>
+            <div class="number">{{ admins }}</div>
+            <div class="label">Admins</div>
+        </div>
+        <div class="stat-card admin">
+            <div class="icon">👨‍💼</div>
+            <div class="number">{{ managers }}</div>
+            <div class="label">Managers</div>
+        </div>
+        <div class="stat-card admin">
+            <div class="icon">👤</div>
+            <div class="number">{{ employees }}</div>
+            <div class="label">Employees</div>
+        </div>
+    </div>
+    
+    <div class="content-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Recent User Registrations</h2>
+            <div>
+                <a href="{{ url_for('admin_create_user') }}" class="btn btn-admin btn-sm">Create New User</a>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-secondary btn-sm">View All Users</a>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td><span class="badge badge-{{ user.role }}">{{ user.role|capitalize }}</span></td>
+                        <td><span class="badge badge-active">{{ user.status|capitalize }}</span></td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

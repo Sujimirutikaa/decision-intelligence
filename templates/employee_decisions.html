@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}My Decisions{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            Decision Intelligence
+            <span class="role-badge employee">EMPLOYEE</span>
+        </div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('employee_dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('employee_create_decision') }}" class="nav-link">Create Decision</a>
+            <a href="{{ url_for('employee_decisions') }}" class="nav-link">My Decisions</a>
+            <a href="{{ url_for('employee_alerts') }}" class="nav-link">Alerts</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="content-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>My Decisions</h2>
+            <a href="{{ url_for('employee_create_decision') }}" class="btn btn-employee btn-sm">Create New Decision</a>
+        </div>
+        
+        {% if decisions %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Impact</th>
+                        <th>Status</th>
+                        <th>Outcome</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for decision in decisions %}
+                    <tr>
+                        <td>{{ decision.title }}</td>
+                        <td>{{ decision.category }}</td>
+                        <td>${{ "{:,.0f}".format(decision.financial_impact) }}</td>
+                        <td><span class="badge badge-{{ decision.status }}">{{ decision.status|capitalize }}</span></td>
+                        <td>
+                            {% if decision.outcome == 'good' %}
+                            <span class="badge badge-good">Good</span>
+                            {% elif decision.outcome == 'bad' %}
+                            <span class="badge badge-bad">Bad</span>
+                            {% else %}
+                            <span class="badge badge-pending">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ decision.created_at.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <p style="font-size: 1.2rem; margin-bottom: 20px;">No decisions yet</p>
+            <p>Create your first decision to get started!</p>
+            <a href="{{ url_for('employee_create_decision') }}" class="btn btn-employee" style="margin-top: 20px; display: inline-block; width: auto;">Create Decision</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

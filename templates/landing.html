@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Select Your Role - Decision Intelligence{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <div class="landing-header">
+        <h1>Decision Intelligence Platform</h1>
+        <p>Select your role to continue</p>
+    </div>
+    
+    <div class="role-cards">
+        <a href="{{ url_for('login', role='admin') }}" class="role-card admin">
+            <div class="role-icon">🔧</div>
+            <h2>ADMIN</h2>
+            <p>Manage users and system settings</p>
+            <ul class="role-features">
+                <li>User Management</li>
+                <li>System Analytics</li>
+                <li>Platform Control</li>
+            </ul>
+        </a>
+        
+        <a href="{{ url_for('login', role='manager') }}" class="role-card manager">
+            <div class="role-icon">👥</div>
+            <h2>MANAGER</h2>
+            <p>Review and approve decisions</p>
+            <ul class="role-features">
+                <li>Decision Review</li>
+                <li>Team Analytics</li>
+                <li>Performance Tracking</li>
+            </ul>
+        </a>
+        
+        <a href="{{ url_for('login', role='employee') }}" class="role-card employee">
+            <div class="role-icon">👤</div>
+            <h2>EMPLOYEE</h2>
+            <p>Create and track decisions</p>
+            <ul class="role-features">
+                <li>Create Decisions</li>
+                <li>Track Status</li>
+                <li>View Feedback</li>
+            </ul>
+        </a>
+    </div>
+</div>
+{% endblock %}

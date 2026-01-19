@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Create Decision{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            Decision Intelligence
+            <span class="role-badge employee">EMPLOYEE</span>
+        </div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('employee_dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('employee_create_decision') }}" class="nav-link">Create Decision</a>
+            <a href="{{ url_for('employee_decisions') }}" class="nav-link">My Decisions</a>
+            <a href="{{ url_for('employee_alerts') }}" class="nav-link">Alerts</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="content-card" style="max-width: 700px; margin: 0 auto;">
+        <h2>Create New Decision</h2>
+        <p style="color: #666; margin-bottom: 20px;">Submit a decision for manager review</p>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="title">Decision Title *</label>
+                <input type="text" id="title" name="title" required placeholder="Enter a clear, descriptive title">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" required placeholder="Provide detailed context, rationale, and expected outcomes..."></textarea>
+                <div class="form-help">Include all relevant details to help reviewers understand your decision</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" name="category" required>
+                    <option value="">Select category...</option>
+                    <option value="Strategic">Strategic</option>
+                    <option value="Operational">Operational</option>
+                    <option value="Financial">Financial</option>
+                    <option value="Technical">Technical</option>
+                    <option value="HR">HR</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Product">Product</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="financial_impact">Estimated Financial Impact ($) *</label>
+                <input type="number" id="financial_impact" name="financial_impact" required placeholder="0" min="0" step="1000">
+                <div class="form-help">Enter the estimated financial impact in dollars</div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-employee">Submit Decision</button>
+                <a href="{{ url_for('employee_dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

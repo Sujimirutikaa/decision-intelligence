@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ role|capitalize }} Login - Decision Intelligence{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-header {{ role }}">
+            <div class="login-icon">
+                {% if role == 'admin' %}🔧
+                {% elif role == 'manager' %}👥
+                {% else %}👤{% endif %}
+            </div>
+            <h1>{{ role|capitalize }} Login</h1>
+            <p>Enter your credentials to continue</p>
+        </div>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-{{ role }}">Login</button>
+        </form>
+        
+        <div class="back-link">
+            <a href="{{ url_for('landing') }}">← Back to role selection</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

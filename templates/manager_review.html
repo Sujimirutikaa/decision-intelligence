@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Review Decision{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            Decision Intelligence
+            <span class="role-badge manager">MANAGER</span>
+        </div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('manager_dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('manager_decisions') }}" class="nav-link">Decisions</a>
+            <a href="{{ url_for('manager_analytics') }}" class="nav-link">Analytics</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="content-card" style="max-width: 800px; margin: 0 auto;">
+        <h2>Review Decision</h2>
+        <p style="color: #666; margin-bottom: 30px;">Evaluate and provide feedback on employee decision</p>
+        
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <h3 style="margin-bottom: 15px;">Decision Information</h3>
+            <p><strong>Employee:</strong> {{ decision.creator.username }}</p>
+            <p><strong>Title:</strong> {{ decision.title }}</p>
+            <p><strong>Category:</strong> {{ decision.category }}</p>
+            <p><strong>Financial Impact:</strong> ${{ "{:,.0f}".format(decision.financial_impact) }}</p>
+            <p><strong>Status:</strong> <span class="badge badge-{{ decision.status }}">{{ decision.status|capitalize }}</span></p>
+            <p><strong>Created:</strong> {{ decision.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            <p style="margin-top: 15px;"><strong>Description:</strong></p>
+            <p>{{ decision.description }}</p>
+        </div>
+        
+        {% if decision.status == 'pending' %}
+        <form method="POST">
+            <h3>Review Decision</h3>
+            
+            <div class="form-group">
+                <label>Action *</label>
+                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="action" value="approved" required>
+                        <span>Approve</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="action" value="rejected">
+                        <span>Reject</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="outcome">Outcome (Post-Implementation)</label>
+                <select id="outcome" name="outcome">
+                    <option value="not_determined">Not yet determined</option>
+                    <option value="good">Good - Decision had positive impact</option>
+                    <option value="bad">Bad - Decision had negative impact</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="lessons_learned">Lessons Learned</label>
+                <textarea id="lessons_learned" name="lessons_learned" placeholder="Share insights and lessons from this decision..."></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-manager">Submit Review</button>
+                <a href="{{ url_for('manager_decisions') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+        {% else %}
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
+            <h3>Review Details</h3>
+            <p><strong>Outcome:</strong> 
+                {% if decision.outcome == 'good' %}
+                <span class="badge badge-good">Good</span>
+                {% elif decision.outcome == 'bad' %}
+                <span class="badge badge-bad">Bad</span>
+                {% else %}
+                <span class="badge badge-pending">Not Determined</span>
+                {% endif %}
+            </p>
+            <p><strong>Reviewed:</strong> {{ decision.reviewed_at.strftime('%Y-%m-%d %H:%M') if decision.reviewed_at else 'N/A' }}</p>
+            {% if decision.lessons_learned %}
+            <p><strong>Lessons Learned:</strong></p>
+            <p>{{ decision.lessons_learned }}</p>
+            {% endif %}
+        </div>
+        <div style="margin-top: 20px;">
+            <a href="{{ url_for('manager_decisions') }}" class="btn btn-secondary">Back to Decisions</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

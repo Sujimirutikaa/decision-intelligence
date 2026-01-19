@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            Decision Intelligence
+            <span class="role-badge employee">EMPLOYEE</span>
+        </div>
+        <div class="navbar-nav">
+            <a href="{{ url_for('employee_dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ url_for('employee_create_decision') }}" class="nav-link">Create Decision</a>
+            <a href="{{ url_for('employee_decisions') }}" class="nav-link">My Decisions</a>
+            <a href="{{ url_for('employee_alerts') }}" class="nav-link">Alerts</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="content-card">
+        <h2>All Alerts</h2>
+        
+        {% if alerts %}
+            {% for alert in alerts %}
+            <div class="alert-card {{ alert.alert_type|replace('_', '-') }}">
+                <div style="display: flex; align-items: flex-start;">
+                    <div class="alert-icon">
+                        {% if alert.alert_type == 'high_risk' %}⚠️
+                        {% else %}⏰{% endif %}
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-message">{{ alert.message }}</div>
+                        <div class="alert-time">{{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                </div>
+                {% if not alert.is_read %}
+                <button class="alert-dismiss" onclick="dismissAlert({{ alert.id }})">×</button>
+                {% else %}
+                <span style="color: #999; font-size: 0.85rem;">Read</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 60px 20px; color: #666;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🔔</div>
+                <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: #333;">No Alerts</h3>
+                <p style="font-size: 1rem;">You're all caught up! Alerts will appear here when:</p>
+                <ul style="list-style: none; padding: 0; margin-top: 20px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <li style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">⚠️ You create a high-risk decision (> $100,000)</li>
+                    <li style="padding: 10px 0;">⏰ A decision review becomes overdue</li>
+                </ul>
+                <a href="{{ url_for('employee_create_decision') }}" class="btn btn-employee" style="margin-top: 30px; display: inline-block; width: auto;">Create a Decision</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
