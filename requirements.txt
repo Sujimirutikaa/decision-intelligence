@@ -2,10 +2,7 @@ Flask==3.0.0
 Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
 Werkzeug==3.0.1
-Flask
 gunicorn
-Flask-SQLAlchemy
-Flask-Login
 
 ```link">My Decisions</a>
             <a href="{{ url_for('employee_alerts') }}" class="nav-link">Alerts</a>
