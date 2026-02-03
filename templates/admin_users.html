@@ -1,48 +1,76 @@
 {% extends "base.html" %}
 
-{% block title %}User Management{% endblock %}
+{% block title %}User Management - Admin - Decision Intelligence Platform{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <nav class="navbar">
-        <div class="navbar-brand">
-            Decision Intelligence
-            <span class="role-badge admin">ADMIN</span>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1
+                    class="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    User Management
+                </h1>
+                <p class="text-white/70">Manage all platform users</p>
+            </div>
+            <a href="{{ url_for('admin_create_user') }}"
+                class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition transform hover:scale-105 shadow-lg font-semibold">
+                + Create User
+            </a>
         </div>
-        <div class="navbar-nav">
-            <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('admin_users') }}" class="nav-link">Users</a>
-            <a href="{{ url_for('admin_create_user') }}" class="nav-link">Create User</a>
-            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="content-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>All Users</h2>
-            <a href="{{ url_for('admin_create_user') }}" class="btn btn-admin btn-sm">Create New User</a>
-        </div>
-        <div class="table-container">
-            <table>
+    </div>
+
+    <!-- Users Table -->
+    <div class="glass rounded-xl p-6 fade-in" style="animation-delay: 0.1s">
+        <div class="overflow-x-auto">
+            <table class="w-full">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Created</th>
+                    <tr class="border-b border-white/10">
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">ID</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Username</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Email</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Role</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Status</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Created</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
-                    <tr>
-                        <td>{{ user.id }}</td>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.email }}</td>
-                        <td><span class="badge badge-{{ user.role }}">{{ user.role|capitalize }}</span></td>
-                        <td><span class="badge badge-active">{{ user.status|capitalize }}</span></td>
-                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                        <td class="py-4 px-4 text-white/70">{{ user.id }}</td>
+                        <td class="py-4 px-4 font-medium">{{ user.username }}</td>
+                        <td class="py-4 px-4 text-white/70">{{ user.email }}</td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass
+                                {% if user.role == 'admin' %}bg-purple-500/20 text-purple-300
+                                {% elif user.role == 'manager' %}bg-blue-500/20 text-blue-300
+                                {% else %}bg-green-500/20 text-green-300{% endif %}">
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass
+                                {% if user.status == 'active' %}bg-green-500/20 text-green-300
+                                {% else %}bg-red-500/20 text-red-300{% endif %}">
+                                {{ user.status }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-white/70 text-sm">{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+                        <td class="py-4 px-4">
+                            <div class="flex gap-2">
+                                <a href="{{ url_for('admin_edit_user', user_id=user.id) }}"
+                                    class="px-3 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 transition text-sm">
+                                    Edit
+                                </a>
+                                <button onclick="confirmDelete({{ user.id }}, '{{ user.username }}')"
+                                    class="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition text-sm">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -50,4 +78,45 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+    <div class="glass-strong rounded-xl p-8 max-w-md w-full fade-in">
+        <h3 class="text-2xl font-bold mb-4">Confirm Delete</h3>
+        <p class="text-white/70 mb-6">Are you sure you want to delete user <span id="deleteUsername"
+                class="font-semibold text-white"></span>? This action cannot be undone.</p>
+
+        <form id="deleteForm" method="POST" class="flex gap-4">
+            <button type="submit"
+                class="flex-1 py-3 rounded-lg font-semibold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transition">
+                Delete User
+            </button>
+            <button type="button" onclick="closeDeleteModal()"
+                class="flex-1 py-3 rounded-lg font-semibold bg-white/10 hover:bg-white/20 transition">
+                Cancel
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmDelete(userId, username) {
+        document.getElementById('deleteUsername').textContent = username;
+        document.getElementById('deleteForm').action = `/admin/delete-user/${userId}`;
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+        }
+    });
+</script>
 {% endblock %}

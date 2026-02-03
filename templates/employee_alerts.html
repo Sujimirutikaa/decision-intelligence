@@ -1,58 +1,118 @@
 {% extends "base.html" %}
 
-{% block title %}Alerts{% endblock %}
+{% block title %}Alerts - Employee - Decision Intelligence Platform{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <nav class="navbar">
-        <div class="navbar-brand">
-            Decision Intelligence
-            <span class="role-badge employee">EMPLOYEE</span>
-        </div>
-        <div class="navbar-nav">
-            <a href="{{ url_for('employee_dashboard') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('employee_create_decision') }}" class="nav-link">Create Decision</a>
-            <a href="{{ url_for('employee_decisions') }}" class="nav-link">My Decisions</a>
-            <a href="{{ url_for('employee_alerts') }}" class="nav-link">Alerts</a>
-            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="content-card">
-        <h2>All Alerts</h2>
-        
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 fade-in">
+        <h1
+            class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+            Alerts & Notifications
+        </h1>
+        <p class="text-white/70">Stay updated on your decisions</p>
+    </div>
+
+    <!-- Alerts List -->
+    <div class="space-y-4">
         {% if alerts %}
-            {% for alert in alerts %}
-            <div class="alert-card {{ alert.alert_type|replace('_', '-') }}">
-                <div style="display: flex; align-items: flex-start;">
-                    <div class="alert-icon">
-                        {% if alert.alert_type == 'high_risk' %}⚠️
-                        {% else %}⏰{% endif %}
+        {% for alert in alerts %}
+        <div class="glass rounded-xl p-6 hover-lift fade-in" style="animation-delay: {{ loop.index0 * 0.05 }}s">
+            <div class="flex items-start justify-between">
+                <div class="flex items-start flex-1">
+                    <!-- Icon -->
+                    <div class="w-12 h-12 rounded-lg 
+                            {% if alert.alert_type == 'high_risk' %}bg-red-500/20
+                            {% else %}bg-yellow-500/20{% endif %} 
+                            flex items-center justify-center mr-4 flex-shrink-0">
+                        <svg class="w-6 h-6 
+                                {% if alert.alert_type == 'high_risk' %}text-red-400
+                                {% else %}text-yellow-400{% endif %}" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            {% if alert.alert_type == 'high_risk' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                            {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            {% endif %}
+                        </svg>
                     </div>
-                    <div class="alert-content">
-                        <div class="alert-message">{{ alert.message }}</div>
-                        <div class="alert-time">{{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+
+                    <!-- Content -->
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h3 class="font-semibold mr-3">{{ alert.message }}</h3>
+                            {% if not alert.is_read %}
+                            <span class="px-2 py-1 rounded-full text-xs glass bg-blue-500/20 text-blue-300">
+                                New
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Meta -->
+                        <div class="flex items-center text-sm text-white/60 mb-3">
+                            <span class="px-2 py-1 rounded-full text-xs glass 
+                                    {% if alert.alert_type == 'high_risk' %}bg-red-500/20 text-red-300
+                                    {% else %}bg-yellow-500/20 text-yellow-300{% endif %}">
+                                {{ alert.alert_type.replace('_', ' ').title() }}
+                            </span>
+                            <span class="mx-2">•</span>
+                            <span>{{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+
+                        <!-- Action -->
+                        {% if alert.decision_id %}
+                        <a href="{{ url_for('employee_decisions', view=alert.decision_id) }}"
+                            class="inline-block px-4 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 transition text-sm">
+                            View Decision
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
+
+                <!-- Dismiss Button -->
                 {% if not alert.is_read %}
-                <button class="alert-dismiss" onclick="dismissAlert({{ alert.id }})">×</button>
-                {% else %}
-                <span style="color: #999; font-size: 0.85rem;">Read</span>
+                <button onclick="dismissAlert({{ alert.id }})"
+                    class="ml-4 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition text-sm">
+                    Dismiss
+                </button>
                 {% endif %}
             </div>
-            {% endfor %}
+        </div>
+        {% endfor %}
         {% else %}
-            <div style="text-align: center; padding: 60px 20px; color: #666;">
-                <div style="font-size: 4rem; margin-bottom: 20px;">🔔</div>
-                <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: #333;">No Alerts</h3>
-                <p style="font-size: 1rem;">You're all caught up! Alerts will appear here when:</p>
-                <ul style="list-style: none; padding: 0; margin-top: 20px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
-                    <li style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">⚠️ You create a high-risk decision (> $100,000)</li>
-                    <li style="padding: 10px 0;">⏰ A decision review becomes overdue</li>
-                </ul>
-                <a href="{{ url_for('employee_create_decision') }}" class="btn btn-employee" style="margin-top: 30px; display: inline-block; width: auto;">Create a Decision</a>
-            </div>
+        <div class="glass rounded-xl p-12 text-center fade-in">
+            <svg class="w-20 h-20 mx-auto mb-4 opacity-50 text-white/60" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                </path>
+            </svg>
+            <p class="text-lg text-white/60 mb-2">No alerts</p>
+            <p class="text-sm text-white/50">You're all caught up!</p>
+        </div>
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function dismissAlert(alertId) {
+        fetch(`/api/dismiss-alert/${alertId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+</script>
 {% endblock %}

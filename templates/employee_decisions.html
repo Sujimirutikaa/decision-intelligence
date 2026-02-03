@@ -1,71 +1,224 @@
 {% extends "base.html" %}
 
-{% block title %}My Decisions{% endblock %}
+{% block title %}My Decisions - Employee - Decision Intelligence Platform{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <nav class="navbar">
-        <div class="navbar-brand">
-            Decision Intelligence
-            <span class="role-badge employee">EMPLOYEE</span>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1
+                    class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                    My Decisions
+                </h1>
+                <p class="text-white/70">Track and manage your submitted decisions</p>
+            </div>
+            <a href="{{ url_for('employee_create_decision') }}"
+                class="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 transition transform hover:scale-105 shadow-lg font-semibold">
+                + Create Decision
+            </a>
         </div>
-        <div class="navbar-nav">
-            <a href="{{ url_for('employee_dashboard') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('employee_create_decision') }}" class="nav-link">Create Decision</a>
-            <a href="{{ url_for('employee_decisions') }}" class="nav-link">My Decisions</a>
-            <a href="{{ url_for('employee_alerts') }}" class="nav-link">Alerts</a>
-            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="content-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>My Decisions</h2>
-            <a href="{{ url_for('employee_create_decision') }}" class="btn btn-employee btn-sm">Create New Decision</a>
-        </div>
-        
+    </div>
+
+    <!-- Decisions Table -->
+    <div class="glass rounded-xl p-6 fade-in" style="animation-delay: 0.1s">
         {% if decisions %}
-        <div class="table-container">
-            <table>
+        <div class="overflow-x-auto">
+            <table class="w-full">
                 <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Impact</th>
-                        <th>Status</th>
-                        <th>Outcome</th>
-                        <th>Created</th>
+                    <tr class="border-b border-white/10">
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Title</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Category</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Financial Impact</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Status</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Outcome</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Created</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for decision in decisions %}
-                    <tr>
-                        <td>{{ decision.title }}</td>
-                        <td>{{ decision.category }}</td>
-                        <td>${{ "{:,.0f}".format(decision.financial_impact) }}</td>
-                        <td><span class="badge badge-{{ decision.status }}">{{ decision.status|capitalize }}</span></td>
-                        <td>
-                            {% if decision.outcome == 'good' %}
-                            <span class="badge badge-good">Good</span>
-                            {% elif decision.outcome == 'bad' %}
-                            <span class="badge badge-bad">Bad</span>
-                            {% else %}
-                            <span class="badge badge-pending">N/A</span>
-                            {% endif %}
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                        <td class="py-4 px-4 font-medium">{{ decision.title }}</td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass bg-purple-500/20 text-purple-300">
+                                {{ decision.category }}
+                            </span>
                         </td>
-                        <td>{{ decision.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass 
+                                {% if decision.financial_impact > 100000 %}bg-red-500/20 text-red-300
+                                {% else %}bg-yellow-500/20 text-yellow-300{% endif %}">
+                                ${{ "{:,.0f}".format(decision.financial_impact) }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass
+                                {% if decision.status == 'pending' %}bg-yellow-500/20 text-yellow-300
+                                {% elif decision.status == 'approved' %}bg-green-500/20 text-green-300
+                                {% else %}bg-red-500/20 text-red-300{% endif %}">
+                                {{ decision.status|title }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass
+                                {% if decision.outcome == 'good' %}bg-green-500/20 text-green-300
+                                {% elif decision.outcome == 'bad' %}bg-red-500/20 text-red-300
+                                {% else %}bg-gray-500/20 text-gray-300{% endif %}">
+                                {{ decision.outcome.replace('_', ' ')|title }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-white/70 text-sm">{{ decision.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="py-4 px-4">
+                            <button onclick="openDecisionModal(this)" id="btn-{{ decision.id }}"
+                                data-id="{{ decision.id }}" data-title="{{ decision.title }}"
+                                data-description="{{ decision.description }}"
+                                data-lessons="{{ decision.lessons_learned if decision.lessons_learned else '' }}"
+                                data-status="{{ decision.status }}"
+                                class="px-3 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 transition text-sm text-blue-300">
+                                View
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <div style="text-align: center; padding: 40px; color: #666;">
-            <p style="font-size: 1.2rem; margin-bottom: 20px;">No decisions yet</p>
-            <p>Create your first decision to get started!</p>
-            <a href="{{ url_for('employee_create_decision') }}" class="btn btn-employee" style="margin-top: 20px; display: inline-block; width: auto;">Create Decision</a>
+        <div class="text-center py-12 text-white/60">
+            <svg class="w-20 h-20 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            <p class="text-lg mb-2">No decisions yet</p>
+            <p class="text-sm mb-4">Start by creating your first decision</p>
+            <a href="{{ url_for('employee_create_decision') }}"
+                class="inline-block px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 transition font-semibold">
+                Create Decision
+            </a>
         </div>
         {% endif %}
     </div>
 </div>
+
+<!-- Decision Details Modal -->
+<div id="decisionModal"
+    class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center px-4 backdrop-blur-sm">
+    <div
+        class="glass-strong rounded-2xl p-8 max-w-2xl w-full fade-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <button onclick="closeDecisionModal()" class="absolute top-4 right-4 text-white/50 hover:text-white transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <div class="mb-6">
+            <span id="modalStatus"
+                class="px-3 py-1 rounded-full text-xs glass bg-blue-500/20 text-blue-300 mb-2 inline-block">
+                Pending
+            </span>
+            <h2 id="modalTitle"
+                class="text-3xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent mt-2">
+                Decision Title
+            </h2>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <h3 class="text-sm font-semibold text-white/50 mb-2 uppercase tracking-wider">Description</h3>
+                <div class="glass p-4 rounded-xl text-white/90 leading-relaxed" id="modalDescription">
+                    Decision description goes here...
+                </div>
+            </div>
+
+            <div id="modalLessonsContainer" class="hidden">
+                <h3 class="text-sm font-semibold text-white/50 mb-2 uppercase tracking-wider">Lessons Learned</h3>
+                <div class="glass p-4 rounded-xl text-white/90 leading-relaxed" id="modalLessons">
+                    Lessons learned content...
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-white/10 flex justify-end">
+            <button onclick="closeDecisionModal()"
+                class="px-6 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition font-semibold">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openDecisionModal(button) {
+        // Handle case where function is called with ID directly (from query param check)
+        if (typeof button === 'string' || typeof button === 'number') {
+            button = document.getElementById(`btn-${button}`);
+        }
+
+        if (!button) return;
+
+        const title = button.dataset.title;
+        const description = button.dataset.description;
+        const lessons = button.dataset.lessons;
+        const status = button.dataset.status;
+
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalDescription').innerText = description;
+        document.getElementById('modalStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+        // Update status badge color
+        const statusBadge = document.getElementById('modalStatus');
+        statusBadge.className = 'px-3 py-1 rounded-full text-xs glass mb-2 inline-block ';
+        if (status === 'approved') {
+            statusBadge.classList.add('bg-green-500/20', 'text-green-300');
+        } else if (status === 'rejected') {
+            statusBadge.classList.add('bg-red-500/20', 'text-red-300');
+        } else {
+            statusBadge.classList.add('bg-yellow-500/20', 'text-yellow-300');
+        }
+
+        // Show lessons if available
+        const lessonsContainer = document.getElementById('modalLessonsContainer');
+        if (lessons && lessons !== 'None' && lessons !== '') {
+            document.getElementById('modalLessons').innerText = lessons;
+            lessonsContainer.classList.remove('hidden');
+        } else {
+            lessonsContainer.classList.add('hidden');
+        }
+
+        document.getElementById('decisionModal').classList.remove('hidden');
+    }
+
+
+    function closeDecisionModal() {
+        document.getElementById('decisionModal').classList.add('hidden');
+        // Remove query param from URL
+        const url = new URL(window.location);
+        url.searchParams.delete('view');
+        window.history.pushState({}, '', url);
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeDecisionModal();
+        }
+    });
+
+    // Check for view param on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const decisionId = urlParams.get('view');
+        if (decisionId) {
+            const btn = document.getElementById(`btn-${decisionId}`);
+            if (btn) {
+                btn.click();
+            }
+        }
+    });
+</script>
 {% endblock %}

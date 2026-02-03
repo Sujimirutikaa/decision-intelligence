@@ -80,6 +80,11 @@ def login(role):
         user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password) and user.role == role:
+            # Check if user account is active
+            if user.status != 'active':
+                flash('Your account has been blocked by admin. Please contact an administrator.', 'error')
+                return render_template('login.html', role=role)
+            
             login_user(user)
             if role == 'admin':
                 return redirect(url_for('admin_dashboard'))
@@ -91,6 +96,7 @@ def login(role):
             flash('Invalid credentials or role mismatch', 'error')
     
     return render_template('login.html', role=role)
+
 
 @app.route('/logout')
 @login_required
@@ -152,6 +158,62 @@ def admin_create_user():
             return redirect(url_for('admin_users'))
     
     return render_template('admin_create_user.html')
+
+@app.route('/admin/edit-user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def admin_edit_user(user_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('landing'))
+    
+    user = User.query.get_or_404(user_id)
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        role = request.form.get('role')
+        status = request.form.get('status')
+        password = request.form.get('password')
+        
+        # Check if username is taken by another user
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user and existing_user.id != user_id:
+            flash('Username already exists', 'error')
+        # Check if email is taken by another user
+        elif User.query.filter_by(email=email).first() and User.query.filter_by(email=email).first().id != user_id:
+            flash('Email already exists', 'error')
+        else:
+            user.username = username
+            user.email = email
+            user.role = role
+            user.status = status
+            if password:  # Only update password if provided
+                user.set_password(password)
+            db.session.commit()
+            flash('User updated successfully', 'success')
+            return redirect(url_for('admin_users'))
+    
+    return render_template('admin_edit_user.html', user=user)
+
+@app.route('/admin/delete-user/<int:user_id>', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    if current_user.role != 'admin':
+        return redirect(url_for('landing'))
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Prevent deleting yourself
+    if user.id == current_user.id:
+        flash('You cannot delete your own account', 'error')
+        return redirect(url_for('admin_users'))
+    
+    # Delete user and associated data
+    username = user.username
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'User "{username}" deleted successfully', 'success')
+    return redirect(url_for('admin_users'))
 
 # Manager Routes
 @app.route('/manager/dashboard')

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Create User - Admin - Decision Intelligence Platform{% endblock %}
+{% block title %}Edit User - Admin - Decision Intelligence Platform{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
@@ -19,18 +19,18 @@
     <!-- Header -->
     <div class="mb-8 fade-in" style="animation-delay: 0.1s">
         <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Create New User
+            Edit User
         </h1>
-        <p class="text-white/70">Add a new user to the platform</p>
+        <p class="text-white/70">Update user information</p>
     </div>
 
     <!-- Form Card -->
     <div class="glass-strong rounded-xl p-8 fade-in" style="animation-delay: 0.2s">
-        <form method="POST" action="{{ url_for('admin_create_user') }}" class="space-y-6">
+        <form method="POST" action="{{ url_for('admin_edit_user', user_id=user.id) }}" class="space-y-6">
             <!-- Username -->
             <div>
                 <label for="username" class="block text-sm font-medium mb-2 text-white/90">Username</label>
-                <input type="text" id="username" name="username" required
+                <input type="text" id="username" name="username" required value="{{ user.username }}"
                     class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition text-white placeholder-white/40"
                     placeholder="Enter username">
             </div>
@@ -38,17 +38,20 @@
             <!-- Email -->
             <div>
                 <label for="email" class="block text-sm font-medium mb-2 text-white/90">Email</label>
-                <input type="email" id="email" name="email" required
+                <input type="email" id="email" name="email" required value="{{ user.email }}"
                     class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition text-white placeholder-white/40"
                     placeholder="Enter email address">
             </div>
 
-            <!-- Password -->
+            <!-- Password (Optional) -->
             <div>
                 <label for="password" class="block text-sm font-medium mb-2 text-white/90">Password</label>
-                <input type="password" id="password" name="password" required
+                <input type="password" id="password" name="password"
                     class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition text-white placeholder-white/40"
-                    placeholder="Enter password">
+                    placeholder="Leave blank to keep current password">
+                <p class="text-white/50 text-xs mt-2">
+                    💡 Leave blank to keep the current password
+                </p>
             </div>
 
             <!-- Role -->
@@ -56,18 +59,35 @@
                 <label for="role" class="block text-sm font-medium mb-2 text-white/90">Role</label>
                 <select id="role" name="role" required
                     class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition text-white">
-                    <option value="" class="bg-slate-800">Select a role</option>
-                    <option value="admin" class="bg-slate-800">Admin</option>
-                    <option value="manager" class="bg-slate-800">Manager</option>
-                    <option value="employee" class="bg-slate-800">Employee</option>
+                    <option value="admin" class="bg-slate-800" {% if user.role=='admin' %}selected{% endif %}>Admin
+                    </option>
+                    <option value="manager" class="bg-slate-800" {% if user.role=='manager' %}selected{% endif %}>
+                        Manager</option>
+                    <option value="employee" class="bg-slate-800" {% if user.role=='employee' %}selected{% endif %}>
+                        Employee</option>
                 </select>
             </div>
 
+            <!-- Status -->
+            <div>
+                <label for="status" class="block text-sm font-medium mb-2 text-white/90">Status</label>
+                <select id="status" name="status" required
+                    class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition text-white">
+                    <option value="active" class="bg-slate-800" {% if user.status=='active' %}selected{% endif %}>Active
+                    </option>
+                    <option value="inactive" class="bg-slate-800" {% if user.status=='inactive' %}selected{% endif %}>
+                        Inactive</option>
+                </select>
+                <p class="text-white/50 text-xs mt-2">
+                    💡 <strong>Active:</strong> User can login and access the platform. <strong>Inactive:</strong> User
+                    account is disabled and cannot login.
+                </p>
+            </div>
             <!-- Buttons -->
             <div class="flex gap-4 pt-4">
                 <button type="submit"
                     class="flex-1 py-3 rounded-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 transition transform hover:scale-105 shadow-lg">
-                    Create User
+                    Update User
                 </button>
                 <a href="{{ url_for('admin_users') }}"
                     class="flex-1 py-3 rounded-lg font-semibold bg-white/10 hover:bg-white/20 transition text-center">

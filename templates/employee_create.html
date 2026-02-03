@@ -1,63 +1,103 @@
 {% extends "base.html" %}
 
-{% block title %}Create Decision{% endblock %}
+{% block title %}Create Decision - Employee - Decision Intelligence Platform{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <nav class="navbar">
-        <div class="navbar-brand">
-            Decision Intelligence
-            <span class="role-badge employee">EMPLOYEE</span>
-        </div>
-        <div class="navbar-nav">
-            <a href="{{ url_for('employee_dashboard') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('employee_create_decision') }}" class="nav-link">Create Decision</a>
-            <a href="{{ url_for('employee_decisions') }}" class="nav-link">My Decisions</a>
-            <a href="{{ url_for('employee_alerts') }}" class="nav-link">Alerts</a>
-            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="content-card" style="max-width: 700px; margin: 0 auto;">
-        <h2>Create New Decision</h2>
-        <p style="color: #666; margin-bottom: 20px;">Submit a decision for manager review</p>
-        
-        <form method="POST">
-            <div class="form-group">
-                <label for="title">Decision Title *</label>
-                <input type="text" id="title" name="title" required placeholder="Enter a clear, descriptive title">
+<div class="max-w-3xl mx-auto">
+    <!-- Back Button -->
+    <div class="mb-6 fade-in">
+        <a href="{{ url_for('employee_dashboard') }}"
+            class="inline-flex items-center text-white/70 hover:text-white transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Back to dashboard
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-8 fade-in" style="animation-delay: 0.1s">
+        <h1
+            class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+            Create New Decision
+        </h1>
+        <p class="text-white/70">Submit a decision for manager review</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="glass-strong rounded-xl p-8 fade-in" style="animation-delay: 0.2s">
+        <form method="POST" action="{{ url_for('employee_create_decision') }}" class="space-y-6">
+            <!-- Title -->
+            <div>
+                <label for="title" class="block text-sm font-medium mb-2 text-white/90">Decision Title</label>
+                <input type="text" id="title" name="title" required
+                    class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/50 transition text-white placeholder-white/40"
+                    placeholder="Enter a clear, concise title">
             </div>
-            
-            <div class="form-group">
-                <label for="description">Description *</label>
-                <textarea id="description" name="description" required placeholder="Provide detailed context, rationale, and expected outcomes..."></textarea>
-                <div class="form-help">Include all relevant details to help reviewers understand your decision</div>
+
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium mb-2 text-white/90">Description</label>
+                <textarea id="description" name="description" rows="5" required
+                    class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/50 transition text-white placeholder-white/40"
+                    placeholder="Provide detailed context, rationale, and expected outcomes..."></textarea>
             </div>
-            
-            <div class="form-group">
-                <label for="category">Category *</label>
-                <select id="category" name="category" required>
-                    <option value="">Select category...</option>
-                    <option value="Strategic">Strategic</option>
-                    <option value="Operational">Operational</option>
-                    <option value="Financial">Financial</option>
-                    <option value="Technical">Technical</option>
-                    <option value="HR">HR</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Product">Product</option>
-                    <option value="Other">Other</option>
+
+            <!-- Category -->
+            <div>
+                <label for="category" class="block text-sm font-medium mb-2 text-white/90">Category</label>
+                <select id="category" name="category" required
+                    class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/50 transition text-white">
+                    <option value="" class="bg-slate-800">Select a category</option>
+                    <option value="Technical" class="bg-slate-800">Technical</option>
+                    <option value="Operational" class="bg-slate-800">Operational</option>
+                    <option value="Strategic" class="bg-slate-800">Strategic</option>
+                    <option value="Financial" class="bg-slate-800">Financial</option>
+                    <option value="HR" class="bg-slate-800">HR</option>
+                    <option value="Marketing" class="bg-slate-800">Marketing</option>
+                    <option value="Other" class="bg-slate-800">Other</option>
                 </select>
             </div>
-            
-            <div class="form-group">
-                <label for="financial_impact">Estimated Financial Impact ($) *</label>
-                <input type="number" id="financial_impact" name="financial_impact" required placeholder="0" min="0" step="1000">
-                <div class="form-help">Enter the estimated financial impact in dollars</div>
+
+            <!-- Financial Impact -->
+            <div>
+                <label for="financial_impact" class="block text-sm font-medium mb-2 text-white/90">Financial Impact
+                    ($)</label>
+                <input type="number" id="financial_impact" name="financial_impact" required min="0" step="0.01"
+                    class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/50 transition text-white placeholder-white/40"
+                    placeholder="0.00">
+                <p class="text-white/50 text-xs mt-2">
+                    💡 Decisions over $100,000 will be flagged as high-risk
+                </p>
             </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="btn btn-employee">Submit Decision</button>
-                <a href="{{ url_for('employee_dashboard') }}" class="btn btn-secondary">Cancel</a>
+
+            <!-- Info Box -->
+            <div class="glass rounded-lg p-4 border border-blue-400/30">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-sm text-white/80">
+                        <p class="font-semibold mb-1">Decision Review Process</p>
+                        <p class="text-white/60">Your decision will be submitted to managers for review. You'll receive
+                            alerts about the status and any feedback.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-4 pt-4">
+                <button type="submit"
+                    class="flex-1 py-3 rounded-lg font-semibold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 transition transform hover:scale-105 shadow-lg">
+                    Submit Decision
+                </button>
+                <a href="{{ url_for('employee_dashboard') }}"
+                    class="flex-1 py-3 rounded-lg font-semibold bg-white/10 hover:bg-white/20 transition text-center">
+                    Cancel
+                </a>
             </div>
         </form>
     </div>

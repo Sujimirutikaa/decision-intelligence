@@ -1,62 +1,63 @@
 {% extends "base.html" %}
 
-{% block title %}All Decisions{% endblock %}
+{% block title %}All Decisions - Manager - Decision Intelligence Platform{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <nav class="navbar">
-        <div class="navbar-brand">
-            Decision Intelligence
-            <span class="role-badge manager">MANAGER</span>
-        </div>
-        <div class="navbar-nav">
-            <a href="{{ url_for('manager_dashboard') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('manager_decisions') }}" class="nav-link">Decisions</a>
-            <a href="{{ url_for('manager_analytics') }}" class="nav-link">Analytics</a>
-            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="content-card">
-        <h2>All Decisions</h2>
-        <div class="table-container">
-            <table>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 fade-in">
+        <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            All Decisions
+        </h1>
+        <p class="text-white/70">Review and manage all decisions</p>
+    </div>
+
+    <!-- Decisions Table -->
+    <div class="glass rounded-xl p-6 fade-in" style="animation-delay: 0.1s">
+        <div class="overflow-x-auto">
+            <table class="w-full">
                 <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Impact</th>
-                        <th>Status</th>
-                        <th>Outcome</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                    <tr class="border-b border-white/10">
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Title</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Creator</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Category</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Impact</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Status</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Created</th>
+                        <th class="text-left py-4 px-4 text-white/70 font-medium">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for decision in decisions %}
-                    <tr>
-                        <td>{{ decision.creator.username }}</td>
-                        <td>{{ decision.title }}</td>
-                        <td>{{ decision.category }}</td>
-                        <td>${{ "{:,.0f}".format(decision.financial_impact) }}</td>
-                        <td><span class="badge badge-{{ decision.status }}">{{ decision.status|capitalize }}</span></td>
-                        <td>
-                            {% if decision.outcome == 'good' %}
-                            <span class="badge badge-good">Good</span>
-                            {% elif decision.outcome == 'bad' %}
-                            <span class="badge badge-bad">Bad</span>
-                            {% else %}
-                            <span class="badge badge-pending">N/A</span>
-                            {% endif %}
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                        <td class="py-4 px-4 font-medium">{{ decision.title }}</td>
+                        <td class="py-4 px-4 text-white/70">{{ decision.creator.username }}</td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass bg-purple-500/20 text-purple-300">
+                                {{ decision.category }}
+                            </span>
                         </td>
-                        <td>{{ decision.created_at.strftime('%Y-%m-%d') }}</td>
-                        <td>
-                            {% if decision.status == 'pending' %}
-                            <a href="{{ url_for('manager_review', decision_id=decision.id) }}" class="btn btn-manager btn-sm">Review</a>
-                            {% else %}
-                            <a href="{{ url_for('manager_review', decision_id=decision.id) }}" class="btn btn-secondary btn-sm">View</a>
-                            {% endif %}
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass 
+                                {% if decision.financial_impact > 100000 %}bg-red-500/20 text-red-300
+                                {% else %}bg-yellow-500/20 text-yellow-300{% endif %}">
+                                ${{ "{:,.0f}".format(decision.financial_impact) }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs glass
+                                {% if decision.status == 'pending' %}bg-yellow-500/20 text-yellow-300
+                                {% elif decision.status == 'approved' %}bg-green-500/20 text-green-300
+                                {% else %}bg-red-500/20 text-red-300{% endif %}">
+                                {{ decision.status }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-white/70 text-sm">{{ decision.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="py-4 px-4">
+                            <a href="{{ url_for('manager_review', decision_id=decision.id) }}"
+                                class="px-3 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 transition text-sm">
+                                {% if decision.status == 'pending' %}Review{% else %}View{% endif %}
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}

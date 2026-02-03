@@ -1,97 +1,160 @@
 {% extends "base.html" %}
 
-{% block title %}Review Decision{% endblock %}
+{% block title %}Review Decision - Manager - Decision Intelligence Platform{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <nav class="navbar">
-        <div class="navbar-brand">
-            Decision Intelligence
-            <span class="role-badge manager">MANAGER</span>
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button -->
+    <div class="mb-6 fade-in">
+        <a href="{{ url_for('manager_decisions') }}"
+            class="inline-flex items-center text-white/70 hover:text-white transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Back to decisions
+        </a>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-8 fade-in" style="animation-delay: 0.1s">
+        <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            Review Decision
+        </h1>
+        <p class="text-white/70">Evaluate and provide feedback</p>
+    </div>
+
+    <!-- Decision Details Card -->
+    <div class="glass-strong rounded-xl p-8 mb-6 fade-in" style="animation-delay: 0.2s">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold mb-4">{{ decision.title }}</h2>
+
+            <!-- Meta Info -->
+            <div class="flex flex-wrap gap-3 mb-6">
+                <span class="px-3 py-1 rounded-full text-xs glass bg-purple-500/20 text-purple-300">
+                    {{ decision.category }}
+                </span>
+                <span class="px-3 py-1 rounded-full text-xs glass 
+                    {% if decision.financial_impact > 100000 %}bg-red-500/20 text-red-300
+                    {% else %}bg-yellow-500/20 text-yellow-300{% endif %}">
+                    Impact: ${{ "{:,.0f}".format(decision.financial_impact) }}
+                </span>
+                <span class="px-3 py-1 rounded-full text-xs glass bg-blue-500/20 text-blue-300">
+                    By: {{ decision.creator.username }}
+                </span>
+                <span class="px-3 py-1 rounded-full text-xs glass
+                    {% if decision.status == 'pending' %}bg-yellow-500/20 text-yellow-300
+                    {% elif decision.status == 'approved' %}bg-green-500/20 text-green-300
+                    {% else %}bg-red-500/20 text-red-300{% endif %}">
+                    {{ decision.status }}
+                </span>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2 text-white/90">Description</h3>
+                <p class="text-white/70 leading-relaxed">{{ decision.description }}</p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="text-white/60">Created:</span>
+                    <span class="ml-2 text-white/90">{{ decision.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% if decision.reviewed_at %}
+                <div>
+                    <span class="text-white/60">Reviewed:</span>
+                    <span class="ml-2 text-white/90">{{ decision.reviewed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% endif %}
+            </div>
         </div>
-        <div class="navbar-nav">
-            <a href="{{ url_for('manager_dashboard') }}" class="nav-link">Dashboard</a>
-            <a href="{{ url_for('manager_decisions') }}" class="nav-link">Decisions</a>
-            <a href="{{ url_for('manager_analytics') }}" class="nav-link">Analytics</a>
-            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="content-card" style="max-width: 800px; margin: 0 auto;">
-        <h2>Review Decision</h2>
-        <p style="color: #666; margin-bottom: 30px;">Evaluate and provide feedback on employee decision</p>
-        
-        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-            <h3 style="margin-bottom: 15px;">Decision Information</h3>
-            <p><strong>Employee:</strong> {{ decision.creator.username }}</p>
-            <p><strong>Title:</strong> {{ decision.title }}</p>
-            <p><strong>Category:</strong> {{ decision.category }}</p>
-            <p><strong>Financial Impact:</strong> ${{ "{:,.0f}".format(decision.financial_impact) }}</p>
-            <p><strong>Status:</strong> <span class="badge badge-{{ decision.status }}">{{ decision.status|capitalize }}</span></p>
-            <p><strong>Created:</strong> {{ decision.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-            <p style="margin-top: 15px;"><strong>Description:</strong></p>
-            <p>{{ decision.description }}</p>
-        </div>
-        
-        {% if decision.status == 'pending' %}
-        <form method="POST">
-            <h3>Review Decision</h3>
-            
-            <div class="form-group">
-                <label>Action *</label>
-                <div style="display: flex; gap: 20px; margin-top: 10px;">
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="radio" name="action" value="approved" required>
-                        <span>Approve</span>
+    </div>
+
+    <!-- Review Form -->
+    {% if decision.status == 'pending' %}
+    <div class="glass-strong rounded-xl p-8 fade-in" style="animation-delay: 0.3s">
+        <h3 class="text-xl font-bold mb-6">Submit Review</h3>
+
+        <form method="POST" action="{{ url_for('manager_review', decision_id=decision.id) }}" class="space-y-6">
+            <!-- Action -->
+            <div>
+                <label class="block text-sm font-medium mb-3 text-white/90">Decision</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label
+                        class="glass rounded-lg p-4 cursor-pointer hover:bg-white/10 transition border-2 border-transparent has-[:checked]:border-green-400">
+                        <input type="radio" name="action" value="approved" required class="sr-only">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-6 h-6 mr-2 text-green-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-semibold">Approve</span>
+                        </div>
                     </label>
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="radio" name="action" value="rejected">
-                        <span>Reject</span>
+                    <label
+                        class="glass rounded-lg p-4 cursor-pointer hover:bg-white/10 transition border-2 border-transparent has-[:checked]:border-red-400">
+                        <input type="radio" name="action" value="rejected" required class="sr-only">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-6 h-6 mr-2 text-red-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-semibold">Reject</span>
+                        </div>
                     </label>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label for="outcome">Outcome (Post-Implementation)</label>
-                <select id="outcome" name="outcome">
-                    <option value="not_determined">Not yet determined</option>
-                    <option value="good">Good - Decision had positive impact</option>
-                    <option value="bad">Bad - Decision had negative impact</option>
+
+            <!-- Outcome -->
+            <div>
+                <label for="outcome" class="block text-sm font-medium mb-2 text-white/90">Predicted Outcome</label>
+                <select id="outcome" name="outcome" required
+                    class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition text-white">
+                    <option value="not_determined" class="bg-slate-800">Not Determined</option>
+                    <option value="good" class="bg-slate-800">Good</option>
+                    <option value="bad" class="bg-slate-800">Bad</option>
                 </select>
             </div>
-            
-            <div class="form-group">
-                <label for="lessons_learned">Lessons Learned</label>
-                <textarea id="lessons_learned" name="lessons_learned" placeholder="Share insights and lessons from this decision..."></textarea>
+
+            <!-- Lessons Learned -->
+            <div>
+                <label for="lessons_learned" class="block text-sm font-medium mb-2 text-white/90">Lessons
+                    Learned</label>
+                <textarea id="lessons_learned" name="lessons_learned" rows="4"
+                    class="w-full px-4 py-3 rounded-lg glass border border-white/20 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition text-white placeholder-white/40"
+                    placeholder="Share insights and lessons from this decision..."></textarea>
             </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="btn btn-manager">Submit Review</button>
-                <a href="{{ url_for('manager_decisions') }}" class="btn btn-secondary">Cancel</a>
-            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full py-3 rounded-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 transition transform hover:scale-105 shadow-lg">
+                Submit Review
+            </button>
         </form>
-        {% else %}
-        <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
-            <h3>Review Details</h3>
-            <p><strong>Outcome:</strong> 
-                {% if decision.outcome == 'good' %}
-                <span class="badge badge-good">Good</span>
-                {% elif decision.outcome == 'bad' %}
-                <span class="badge badge-bad">Bad</span>
-                {% else %}
-                <span class="badge badge-pending">Not Determined</span>
-                {% endif %}
-            </p>
-            <p><strong>Reviewed:</strong> {{ decision.reviewed_at.strftime('%Y-%m-%d %H:%M') if decision.reviewed_at else 'N/A' }}</p>
+    </div>
+    {% else %}
+    <!-- Already Reviewed -->
+    <div class="glass-strong rounded-xl p-8 fade-in" style="animation-delay: 0.3s">
+        <h3 class="text-xl font-bold mb-4">Review Details</h3>
+
+        <div class="space-y-4">
+            <div>
+                <span class="text-white/60 text-sm">Outcome:</span>
+                <p class="text-white/90 mt-1">{{ decision.outcome }}</p>
+            </div>
+
             {% if decision.lessons_learned %}
-            <p><strong>Lessons Learned:</strong></p>
-            <p>{{ decision.lessons_learned }}</p>
+            <div>
+                <span class="text-white/60 text-sm">Lessons Learned:</span>
+                <p class="text-white/90 mt-1">{{ decision.lessons_learned }}</p>
+            </div>
             {% endif %}
         </div>
-        <div style="margin-top: 20px;">
-            <a href="{{ url_for('manager_decisions') }}" class="btn btn-secondary">Back to Decisions</a>
-        </div>
-        {% endif %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}

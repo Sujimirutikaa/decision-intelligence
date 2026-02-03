@@ -1,26 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Decision Intelligence Platform{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom Styles - Updated 2026-02-03 14:49 -->
+    <style>
+        * {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #0f172a 100%);
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.5);
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+
+        /* Hover Effects */
+        .hover-lift {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px 0 rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .hover-lift::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(236, 72, 153, 0.5));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .hover-lift:hover::before {
+            opacity: 1;
+        }
+
+        /* Table Row Hover Effects */
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(139, 92, 246, 0.1);
+            transform: scale(1.01);
+        }
+
+        /* Button Hover Glow */
+        button,
+        a.px-3 {
+            transition: all 0.3s ease;
+        }
+
+        button:hover,
+        a.px-3:hover {
+            filter: brightness(1.2);
+        }
+
+        /* Input Focus Glow */
+        input:focus,
+        textarea:focus,
+        select:focus {
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 85, 247, 0.7);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .mobile-menu.active {
+            max-height: 500px;
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
+
+<body class="text-white">
+
+    <!-- Navigation -->
+    {% if current_user.is_authenticated %}
+    <nav class="glass fixed top-0 left-0 right-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <h1
+                        class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        Decision Intelligence
+                    </h1>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    {% block nav_links %}
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Dashboard</a>
+                    <a href="{{ url_for('admin_users') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Users</a>
+                    <a href="{{ url_for('admin_create_user') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Create User</a>
+                    {% elif current_user.role == 'manager' %}
+                    <a href="{{ url_for('manager_dashboard') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Dashboard</a>
+                    <a href="{{ url_for('manager_decisions') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Decisions</a>
+                    <a href="{{ url_for('manager_analytics') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Analytics</a>
+                    {% elif current_user.role == 'employee' %}
+                    <a href="{{ url_for('employee_dashboard') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Dashboard</a>
+                    <a href="{{ url_for('employee_create_decision') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Create Decision</a>
+                    <a href="{{ url_for('employee_decisions') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">My Decisions</a>
+                    <a href="{{ url_for('employee_alerts') }}"
+                        class="px-4 py-2 rounded-lg hover:bg-white/10 transition">Alerts</a>
+                    {% endif %}
+                    {% endblock %}
+
+                    <div class="flex items-center space-x-3 ml-4 pl-4 border-l border-white/20">
+                        <span class="text-sm">{{ current_user.username }}</span>
+                        <span class="px-3 py-1 rounded-full text-xs glass">{{ current_user.role }}</span>
+                        <a href="{{ url_for('logout') }}"
+                            class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition">Logout</a>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-white/10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
-        {% endif %}
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="mobile-menu md:hidden pb-4">
+                {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Dashboard</a>
+                <a href="{{ url_for('admin_users') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Users</a>
+                <a href="{{ url_for('admin_create_user') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Create User</a>
+                {% elif current_user.role == 'manager' %}
+                <a href="{{ url_for('manager_dashboard') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Dashboard</a>
+                <a href="{{ url_for('manager_decisions') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Decisions</a>
+                <a href="{{ url_for('manager_analytics') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Analytics</a>
+                {% elif current_user.role == 'employee' %}
+                <a href="{{ url_for('employee_dashboard') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Dashboard</a>
+                <a href="{{ url_for('employee_create_decision') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Create Decision</a>
+                <a href="{{ url_for('employee_decisions') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">My Decisions</a>
+                <a href="{{ url_for('employee_alerts') }}"
+                    class="block px-4 py-2 rounded-lg hover:bg-white/10 transition mb-2">Alerts</a>
+                {% endif %}
+                <div class="border-t border-white/20 mt-2 pt-2">
+                    <div class="px-4 py-2 text-sm">{{ current_user.username }} ({{ current_user.role }})</div>
+                    <a href="{{ url_for('logout') }}"
+                        class="block px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Spacer for fixed nav -->
+    <div class="h-16"></div>
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="fixed top-20 right-4 z-50 space-y-2 max-w-md">
+        {% for category, message in messages %}
+        <div
+            class="flash-message glass-strong rounded-lg p-4 fade-in {% if category == 'error' %}border-red-400{% elif category == 'success' %}border-green-400{% else %}border-blue-400{% endif %}">
+            <div class="flex items-center justify-between">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white/70 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
-    
-    {% block content %}{% endblock %}
-    
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Main Content -->
+    <main class="{% if current_user.is_authenticated %}container mx-auto px-4 py-8{% endif %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('active');
+            });
+        }
+
+        // Auto-dismiss flash messages after 5 seconds
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
+
 </html>
