@@ -156,7 +156,12 @@
     function openDecisionModal(button) {
         // Handle case where function is called with ID directly (from query param check)
         if (typeof button === 'string' || typeof button === 'number') {
-            button = document.getElementById(`btn-${button}`);
+            const btnElement = document.getElementById(`btn-${button}`);
+            if (btnElement) {
+                button = btnElement;
+            } else {
+                return; // Button not found
+            }
         }
 
         if (!button) return;
@@ -168,7 +173,8 @@
 
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalDescription').innerText = description;
-        document.getElementById('modalStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+        document.getElementById('modalStatus').textContent = statusText;
 
         // Update status badge color
         const statusBadge = document.getElementById('modalStatus');
@@ -199,7 +205,7 @@
         // Remove query param from URL
         const url = new URL(window.location);
         url.searchParams.delete('view');
-        window.history.pushState({}, '', url);
+        window.history.replaceState({}, '', url);
     }
 
     // Close modal on escape key
@@ -213,11 +219,34 @@
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const decisionId = urlParams.get('view');
+
         if (decisionId) {
-            const btn = document.getElementById(`btn-${decisionId}`);
-            if (btn) {
-                btn.click();
-            }
+            // Try to find the element for up to 2 seconds
+            let attempts = 0;
+            const maxAttempts = 20; // 20 * 100ms = 2s
+
+            const checkInterval = setInterval(() => {
+                attempts++;
+                const btn = document.getElementById(`btn-${decisionId}`);
+
+                if (btn) {
+                    clearInterval(checkInterval);
+                    // Call function directly instead of clicking to avoid event issues
+                    openDecisionModal(btn);
+
+                    // Scroll to row
+                    const row = btn.closest('tr');
+                    if (row) {
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add highlight effect
+                        row.classList.add('bg-white/10');
+                        setTimeout(() => row.classList.remove('bg-white/10'), 2000);
+                    }
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    console.warn(`Decision button btn-${decisionId} not found`);
+                }
+            }, 100);
         }
     });
 </script>
